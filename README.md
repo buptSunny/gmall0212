@@ -74,3 +74,5 @@ ORDER BY skv.sku_id , skv.sale_attr_id
 3. 最后将得到的{saleAttrValue：skuId}列表放到前端的隐藏域即可。
 ## 优化说明：
  为避免直接查询数据库，使用reids缓存机制。
+ 
+ 
