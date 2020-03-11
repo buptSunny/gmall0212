@@ -5,7 +5,7 @@
 ![项目介绍](https://sm.ms/delete/l738n1qtPXm6OCAzgj2IfVpkWu)
 ## 主要技术：
 1. 框架：SpringBoot+Mybatis+zookeeper+Dubbo;前后端分离
-2. 前端技术：网站后台 Vue.js+ElementUI 网站前台采用Vue.js 和模板技术 thymeleaf 
+2. 前端技术：网站后台 Nodejs 网站前台采用Vue.js 和模板技术 thymeleaf 
 3. 图片存储：FastDFS
 4. 消息中间件技术： ActiveMQ
 5. 搜索中间件技术： elasticsearch 
