@@ -7,7 +7,7 @@
 1. 框架：SpringBoot+Mybatis+zookeeper+Dubbo;前后端分离
 2. 前端技术：网站后台 Vue.js+ElementUI 网站前台采用Vue.js 和模板技术 thymeleaf 
 3. 图片存储：FastDFS
-4. 消息中间件技术： ActiceMQ
+4. 消息中间件技术： ActiveMQ
 5. 搜索中间件技术： elasticsearch 
 6. 缓存中间件技术： redis 
 7. 单点登录中间件 ：CAS
