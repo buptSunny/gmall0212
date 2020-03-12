@@ -73,6 +73,64 @@ ORDER BY skv.sku_id , skv.sale_attr_id
 ```
 3. 最后将得到的{saleAttrValue：skuId}列表放到前端的隐藏域即可。
 ## 优化说明：
+
  为避免直接查询数据库，使用reids缓存机制。
+
+## 缓存逻辑：
+
+用户发起查询请求，item-web模块首先调用manage-service服务，在redis中查询缓存。如果缓存中有数据则直接返回，若无则继续查询数据库，将查询到的结果同步到缓存，并返回结果。
  
+## 缓存在高并发和安全压力下的一些问题及解决方法：
+
+## 缓存穿透
+
+是利用redis和mysql的机制(redis缓存一旦不存在，就访问mysql)，直接绕过缓存访问mysql，而制造的db请求压力。（利用不存在的key去攻击mysql数据库）
+一般在代码中防止该现象的发生
+解决：为了防止缓存穿透将，null或者空字符串值设置给redis
+
+## 缓存击穿
+
+是某一个热点key在高并发访问的情况下，突然失效，导致大量的并发打进mysql数据库的情况
+
+解决：在正常的访问情况下，如果缓存失效，如果保护mysql，重启缓存的过程
+
+使用redis数据库的分布式锁，解决mysql的访问压力问题
+
+1. 第一种分布式锁：redis自带一个分布式锁,set px nx。只有在key不存在时才成功。
+2. 第二种分布式锁：redisson框架，一个redis的带有juc的lock功能的客户端的实现(既有jedis的功能，又有juc的锁功能)
+
+## 缓存雪崩
+
+缓存时采用了相同的过期时间，导致缓存在某一时刻同时失效，导致的db崩溃
+
+解决：设置不同的缓存失效时间
+
+核心代码展示：
  
+ ```ruby
+ String token = UUID.randomUUID().toString();//设置随机数，作为该线程近似唯一的标识，以防止出现删锁时，由于该线程拿到的锁已经释放了，但操作还						   //没结束，最后删锁删到其他线程的锁了。
+ String setnx = jedis.set("sku:" + skuId + ":lock", token, "nx", "px", 10 * 1000);
+    PmsSkuInfo skuByIdFromDB = null;
+    if (!StringUtils.isBlank(setnx) && setnx.equals("OK")) {
+	//获得分布式锁，访问mysql
+	skuByIdFromDB = getSkuByIdFromDB(skuId);
+	//mysql查询结果存入redis
+	if (skuByIdFromDB != null) {
+	    jedis.set("sku:" + skuId + ":info", JSON.toJSONString(skuByIdFromDB));
+	} else {
+	    jedis.setex("sku:" + skuId + ":info", 3 * 60, JSON.toJSONString(""));
+	}
+	String script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
+	Long eval = (Long) jedis.eval(script, Collections.singletonList("sku:" + skuId + ":lock"), Collections.singletonList(token));
+
+    }
+	Thread.sleep(1000);
+	return getSkuById(skuId);
+    }
+```
+
+注意点：
+
+线程获得锁之后，需要将锁删除，如果在判断出该锁就是当前线程的锁，即将删除之前正好线程卡了，锁过期了。锁又变成其他线程的了，删锁还会删成别人的。
+## 利用lua脚本在查询判断该锁就是当前线程的锁的同时删除锁。
+	
