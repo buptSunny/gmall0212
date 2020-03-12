@@ -134,3 +134,13 @@ ORDER BY skv.sku_id , skv.sale_attr_id
 线程获得锁之后，需要将锁删除，如果在判断出该锁就是当前线程的锁，即将删除之前正好线程卡了，锁过期了。锁又变成其他线程的了，删锁还会删成别人的。
 ## 利用lua脚本在查询判断该锁就是当前线程的锁的同时删除锁。
 	
+# 四、搜索模块：
+
+SearchWeb(8083)+SearchService(8074):
+
+采用elasticsearch服务，主要基于倒排索引（索引是词语：对应的文档），相关性基于tf-idf；idf:某一特定词语的IDF，可以由总文件数除以包含该词语的文件数，再将得到的商取对数得到.
+
+通过jest客户端进行elasticsearch的整合，jest客户端（以Rest Api为主）可以直接使用dsl语句拼成的字符串，直接传给服务端，然后返回json字符串再解析。
+
+采用mongo-connector插件实现数据从Mysql到elasticsearch的同步。
+
