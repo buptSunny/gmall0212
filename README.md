@@ -307,9 +307,13 @@ RSA非对称密钥。原理：超大质数相乘不可逆。应用中保存着�
 
 # 基于jedis的实现
 jedis.watch(productKey);//保证一致性
+
 Transaction tx = jedis.multi();//开启事务
+
 tx.incrBy(productKey, -1);//扣减库存
+
 List<Object> list = tx.exec();//执行事务
+
 mq.send(order);//发出订单
 
 # 限流算法：
