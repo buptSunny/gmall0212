@@ -11,7 +11,7 @@
 4. 消息中间件技术： ActiveMQ
 5. 搜索中间件技术： elasticsearch 
 6. 缓存中间件技术： redis 
-7. 单点登录中间件 ：CAS
+7. 单点登录:SSO
 # 二、管理后台模块：
 ManageWeb(8081)+ManageService(8071)
  管理后台供管理员对平台属性/平台属性值进行增删改查，并对商品sku/spu进行增删改查。
